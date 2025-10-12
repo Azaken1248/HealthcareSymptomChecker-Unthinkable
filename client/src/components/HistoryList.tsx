@@ -10,14 +10,27 @@ type Props = {
 };
 
 const EMERGENCY_KEYWORDS = [
-  "emergency",
-  "urgent",
-  "call 911",
-  "immediately",
-  "seek care",
-  "danger",
+  "chest pain",
+  "crushing pain",
+  "shortness of breath",
+  "can't breathe",
+  "cannot breathe",
+  "difficulty breathing",
+  "numbness in face",
+  "numbness in arm",
+  "slurred speech",
+  "sudden vision loss",
+  "blurry vision",
+  "severe headache",
+  "worst headache",
+  "suicidal",
+  "harm myself",
+  "unconscious",
+  "not breathing",
+  "seizure",
+  "convulsion",
   "choking",
-  "severe",
+  "severe bleeding",
 ];
 
 function isEmergencyItem(h: HistoryItem) {
