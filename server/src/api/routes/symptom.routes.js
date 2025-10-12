@@ -1,11 +1,13 @@
 import { Router } from 'express';
 import { body } from 'express-validator';
-import { getSymptomAnalysis } from '../controllers/symptom.controller.js';
+import { getSymptomAnalysis, getQueryHistory } from '../controllers/symptom.controller.js';
+import verifyToken from '../../middleware/authMiddleware.js';
 
 const router = Router();
 
 router.post(
   '/check-symptoms',
+  verifyToken,
   [
     body('symptoms')
       .trim()
@@ -15,5 +17,7 @@ router.post(
   ],
   getSymptomAnalysis
 );
+
+router.get('/history', verifyToken, getQueryHistory);
 
 export default router;
