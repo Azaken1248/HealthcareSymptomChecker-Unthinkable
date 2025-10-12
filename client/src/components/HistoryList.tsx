@@ -1,6 +1,7 @@
 import { useState, useMemo } from "react";
 import type { HistoryItem } from "../types";
 import { downloadCumulative } from "../utils/pdf";
+import Loader from "./Spinner";
 
 type Props = {
   history: HistoryItem[];
@@ -94,7 +95,10 @@ const HistoryList = ({ history, isLoading, onSelect, selectedId }: Props) => {
       </div>
 
       {isLoading ? (
-        <div className="text-center text-slate-400">Loading history...</div>
+        <div>
+          <Loader />
+          <div className="text-center text-slate-400">Loading history...</div>
+        </div>
       ) : (
         <>
           <div className="mb-3">
