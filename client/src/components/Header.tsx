@@ -2,11 +2,11 @@ const Header = () => (
   <header className="text-center mb-8">
     <div className="flex items-center justify-center gap-3">
       <span className="text-3xl text-emerald-400">
-        <i className="fas fa-stethoscope"></i>
+        <img src="/icon.svg" alt="medical icon" className="w-8 h-8" />
       </span>
-      <h1 className="text-4xl sm:text-5xl font-extrabold text-emerald-200">
+      <h3 className="text-3xl sm:text-[36px] font-extrabold text-emerald-200">
         AI Symptom Checker
-      </h1>
+      </h3>
     </div>
     <p className="text-emerald-200/80 mt-2">
       Enter your symptoms for an AI-powered analysis.
