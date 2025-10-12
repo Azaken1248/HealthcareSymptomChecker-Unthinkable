@@ -27,7 +27,7 @@ const SymptomForm = ({
     >
       <div className="relative rounded">
         <div className="absolute left-3 top-2 flex items-center gap-2 text-slate-400">
-          <i className="fas fa-stethoscope text-emerald-200"></i>
+          <img src="/icon.svg" alt="medical icon" className="w-6 h-6" />
           <label htmlFor="symptoms" className="text-m text-emerald-200">
             Your Symptoms
           </label>
