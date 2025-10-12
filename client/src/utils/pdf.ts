@@ -60,7 +60,6 @@ export function downloadReport(response: AnalysisResponse, title = "Symptom Repo
     doc.setTextColor(6, 95, 70);
     doc.text("Differentiating Symptoms", margin, cursorY);
     cursorY += 16;
-
     doc.setFontSize(11);
     response.differentiatingSymptoms.forEach((g) => {
       doc.text(`${g.condition}:`, margin, cursorY);
@@ -91,7 +90,16 @@ export function downloadReport(response: AnalysisResponse, title = "Symptom Repo
   }
 
   doc.setProperties({ title });
-  doc.save(`${title.replace(/\s+/g, "_")}.pdf`);
+  
+  const pdfBlob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = `${title.replace(/\s+/g, "_")}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
 }
 
 export function downloadCumulative(history: HistoryItem[], title = "Cumulative_Symptom_Reports") {
@@ -109,10 +117,8 @@ export function downloadCumulative(history: HistoryItem[], title = "Cumulative_S
     doc.setTextColor(10, 60, 40);
     doc.text(`${idx + 1}. Query: ${h.symptoms}`, margin, cursorY);
     cursorY += 16;
-
     doc.setFontSize(11);
     cursorY += addWrappedText(doc, `Summary: ${h.response.summary}`, margin + 8, cursorY, doc.internal.pageSize.getWidth() - margin * 2 - 8, 14);
-
     cursorY += 8;
     if (h.response.possibleConditions?.length) {
       h.response.possibleConditions.forEach((c) => {
@@ -138,5 +144,14 @@ export function downloadCumulative(history: HistoryItem[], title = "Cumulative_S
   });
 
   doc.setProperties({ title });
-  doc.save(`${title}.pdf`);
+
+  const pdfBlob = doc.output('blob');
+  const blobUrl = URL.createObjectURL(pdfBlob);
+  const link = document.createElement('a');
+  link.href = blobUrl;
+  link.download = `${title}.pdf`;
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(blobUrl);
 }
