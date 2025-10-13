@@ -4,6 +4,8 @@ An AI-powered symptom checker that provides a differential diagnosis based on us
 
 ### [Demo Video](https://www.dropbox.com/scl/fi/da81ekich6kl88m5halt5/HealthCareApp-Unthinkable-Rohit-Sinha-22BCE5007.mp4?rlkey=0bkg0trloljjalxea6bwblxux&st=xj9zpyg5&dl=0) | [Live Site](https://health.azaken.com/) | [API Documentation](./DOCUMENTATION.md)
 
+<img width="1266" height="703" alt="{699DEF4A-572A-4926-BA23-B87E63764BF1}" src="https://github.com/user-attachments/assets/ee657b1b-2f84-45ce-99b9-b58dfa72fd7a" />
+
 ---
 
 ## Objective
