@@ -1,24 +1,68 @@
 import admin from 'firebase-admin';
-import fs from 'fs';
-import path from 'path';
-import { fileURLToPath } from 'url';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import config from './index.js';
 
+const moduleDirectory = path.dirname(fileURLToPath(import.meta.url));
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+function parseServiceAccountJson(rawJson) {
+  try {
+    return JSON.parse(rawJson);
+  } catch (error) {
+    throw new Error(`Invalid FIREBASE_SERVICE_ACCOUNT_JSON value: ${error.message}`);
+  }
+}
 
-const serviceAccountPath = path.dirname(__dirname) + '../../serviceAccountKey.json';
+function readServiceAccountFromPath(serviceAccountPath) {
+  if (!serviceAccountPath) {
+    return null;
+  }
+
+  const resolvedPath = path.resolve(serviceAccountPath);
+
+  if (!fs.existsSync(resolvedPath)) {
+    return null;
+  }
+
+  return JSON.parse(fs.readFileSync(resolvedPath, 'utf8'));
+}
+
+function resolveServiceAccount() {
+  if (config.firebaseServiceAccountJson) {
+    return parseServiceAccountJson(config.firebaseServiceAccountJson);
+  }
+
+  const candidatePaths = [
+    config.firebaseServiceAccountPath,
+    path.resolve(moduleDirectory, '../../serviceAccountKey.json'),
+    path.resolve(process.cwd(), 'serviceAccountKey.json'),
+    path.resolve(process.cwd(), 'server', 'serviceAccountKey.json'),
+  ].filter(Boolean);
+
+  for (const candidatePath of candidatePaths) {
+    const serviceAccount = readServiceAccountFromPath(candidatePath);
+
+    if (serviceAccount) {
+      return serviceAccount;
+    }
+  }
+
+  return null;
+}
+
+const serviceAccount = resolveServiceAccount();
 
 try {
-  const serviceAccount = JSON.parse(fs.readFileSync(serviceAccountPath, 'utf8'));
-
   admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
+    credential: serviceAccount
+      ? admin.credential.cert(serviceAccount)
+      : admin.credential.applicationDefault(),
   });
-
-  console.log('Firebase Admin SDK initialized successfully.');
 } catch (error) {
-  console.error('Error initializing Firebase Admin SDK:', error);
-  process.exit(1); 
+  throw new Error(
+    'Failed to initialize Firebase Admin SDK. Set FIREBASE_SERVICE_ACCOUNT_JSON, FIREBASE_SERVICE_ACCOUNT_PATH, or GOOGLE_APPLICATION_CREDENTIALS.',
+  );
 }
 
 export default admin;

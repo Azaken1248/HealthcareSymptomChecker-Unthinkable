@@ -1,23 +1,36 @@
 {
   "name": "server",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
   "keywords": [],
   "author": "",
   "type": "module",
   "license": "ISC",
   "description": "",
+  "overrides": {
+    "@tootallnate/once": "2.0.1",
+    "jws": "4.0.1",
+    "path-to-regexp": "8.4.2",
+    "protobufjs": "7.6.2",
+    "uuid": "11.1.1"
+  },
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "cors": "^2.8.5",
-    "dotenv": "^17.2.3",
-    "express": "^5.1.0",
-    "express-rate-limit": "^8.1.0",
-    "express-validator": "^7.2.1",
-    "express.js": "^1.0.0",
-    "firebase-admin": "^13.5.0"
+    "cors": "^2.8.6",
+    "dotenv": "^17.4.2",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.5.2",
+    "express-validator": "^7.3.2",
+    "firebase-admin": "^13.10.0"
+  },
+  "devDependencies": {
+    "supertest": "^7.2.2",
+    "vitest": "^4.1.8"
   }
 }

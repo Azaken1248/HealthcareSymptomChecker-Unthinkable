@@ -1,4 +1,4 @@
-import { validationResult } from 'express-validator';
+import { matchedData, validationResult } from 'express-validator';
 import { getStructuredLLMResponse } from '../services/llm.service.js';
 import admin from '../../config/firebaseAdmin.js';
 import { emergencyKeywords } from '../../config/emergencyKeywords.js';
@@ -13,30 +13,40 @@ export async function getSymptomAnalysis(req, res) {
   }
 
   try {
-    const { symptoms } = req.body;
+    const { symptoms } = matchedData(req, { locations: ['body'] });
 
-    const uid = req.user.uid; 
-    const lowercasedSymptoms = symptoms.toLowerCase();
-    
-    let isCritical = emergencyKeywords.some(keyword => lowercasedSymptoms.includes(keyword));
+    if (!req.user?.uid) {
+      return res.status(401).json({ message: 'Unauthorized: user profile missing.' });
+    }
 
-    const analysis = await getStructuredLLMResponse(symptoms);
+    const uid = req.user.uid;
+    const normalizedSymptoms = symptoms.trim().replace(/\s+/g, ' ');
+    const lowercasedSymptoms = normalizedSymptoms.toLowerCase();
+
+    const isCritical = emergencyKeywords.some((keyword) => lowercasedSymptoms.includes(keyword));
+
+    const analysis = await getStructuredLLMResponse(normalizedSymptoms);
 
     if (analysis.error) {
-      return res.status(500).json({ message: analysis.error });
+      return res.status(502).json({ message: analysis.error });
     }
+
+    const response = {
+      ...analysis,
+    };
 
     if (isCritical) {
-      analysis.criticalWarning = "A symptom you mentioned can be associated with serious medical conditions. Please prioritize consulting a healthcare professional immediately to rule out any emergencies.";
+      response.criticalWarning =
+        'A symptom you mentioned can be associated with serious medical conditions. Please prioritize consulting a healthcare professional immediately to rule out any emergencies.';
     }
 
-    res.status(200).json(analysis);
+    res.status(200).json(response);
 
-    db.collection('queryHistory').doc(uid).collection('queries').add({
-      symptoms: symptoms,
-      response: analysis, 
-      timestamp: new Date()
-    }).catch(err => console.error("Firestore save failed:", err)); 
+    void db.collection('queryHistory').doc(uid).collection('queries').add({
+      symptoms: normalizedSymptoms,
+      response,
+      timestamp: admin.firestore.FieldValue.serverTimestamp(),
+    }).catch((error) => console.error('Firestore save failed:', error));
 
   } catch (error) {
     console.error('Error in symptom controller:', error);
@@ -49,7 +59,7 @@ export async function getQueryHistory(req, res) {
     const uid = req.user.uid;
 
     const historyRef = db.collection('queryHistory').doc(uid).collection('queries');
-    const snapshot = await historyRef.orderBy('timestamp', 'desc').get();
+    const snapshot = await historyRef.orderBy('timestamp', 'desc').limit(50).get();
 
     if (snapshot.empty) {
       return res.status(200).json([]); 

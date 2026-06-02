@@ -3,6 +3,60 @@ import config from '../../config/index.js';
 
 const genAI = new GoogleGenerativeAI(config.geminiApiKey);
 
+function extractJsonPayload(responseText) {
+  const trimmedText = responseText.trim();
+  const fencedMatch = trimmedText.match(/^```(?:json)?\s*([\s\S]*?)\s*```$/i);
+
+  if (fencedMatch) {
+    return fencedMatch[1].trim();
+  }
+
+  const firstBrace = trimmedText.indexOf('{');
+  const lastBrace = trimmedText.lastIndexOf('}');
+
+  if (firstBrace >= 0 && lastBrace > firstBrace) {
+    return trimmedText.slice(firstBrace, lastBrace + 1);
+  }
+
+  return trimmedText;
+}
+
+function isString(value) {
+  return typeof value === 'string' && value.trim().length > 0;
+}
+
+function isAnalysisResponse(payload) {
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) {
+    return false;
+  }
+
+  const possibleConditions = Array.isArray(payload.possibleConditions) ? payload.possibleConditions : [];
+  const differentiatingSymptoms = Array.isArray(payload.differentiatingSymptoms)
+    ? payload.differentiatingSymptoms
+    : [];
+  const nextSteps = Array.isArray(payload.nextSteps) ? payload.nextSteps : [];
+
+  return (
+    isString(payload.summary) &&
+    isString(payload.disclaimer) &&
+    possibleConditions.every(
+      (condition) =>
+        condition &&
+        isString(condition.name) &&
+        isString(condition.reasoning) &&
+        ['High', 'Medium', 'Low'].includes(condition.confidence),
+    ) &&
+    differentiatingSymptoms.every(
+      (item) =>
+        item &&
+        isString(item.condition) &&
+        Array.isArray(item.symptomsToCheck) &&
+        item.symptomsToCheck.every(isString),
+    ) &&
+    nextSteps.every(isString)
+  );
+}
+
 
 const responseSchema = {
   type: "OBJECT",
@@ -70,13 +124,19 @@ export async function getStructuredLLMResponse(symptomText) {
     6.  Provide safe, actionable next steps.
     7.  Adhere strictly to the provided JSON schema for your entire response.
     
-    User Symptoms: "${symptomText}"
+    User Symptoms: ${JSON.stringify(symptomText)}
     `;
 
     const result = await model.generateContent(prompt);
     const responseText = result.response.text();
-    
-    return JSON.parse(responseText);
+
+    const parsedResponse = JSON.parse(extractJsonPayload(responseText));
+
+    if (!isAnalysisResponse(parsedResponse)) {
+      throw new Error('Model response did not match the expected schema.');
+    }
+
+    return parsedResponse;
 
   } catch (error) {
     console.error('Error communicating with Generative AI:', error);
