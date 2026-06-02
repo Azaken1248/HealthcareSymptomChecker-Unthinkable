@@ -31,7 +31,7 @@ function App() {
         if (token) {
           try {
             const result = await axios.get<HistoryItem[]>(
-              "https://healthapi.azaken.com//api/history",
+              "https://healthapi.azaken.com/api/history",
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
