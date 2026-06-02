@@ -3,7 +3,7 @@
 
 The backend API is responsible for handling symptom analysis requests, managing user query history, and communicating with the Google Generative AI model.
 
-**Base URL**: `https://api.health.azaken.com`
+**Base URL**: `https://healthapi.azaken.com/`
 
 ---
 
@@ -32,7 +32,7 @@ The API has a rate limiter to prevent abuse. The current limit is **100 requests
 #### cURL Command:
 
 ```bash
-curl -X POST https://api.health.azaken.com/api/check-symptoms -H "Content-Type: application/json" -H "Authorization: Bearer <YOUR_FIREBASE_ID_TOKEN>" -d '{
+curl -X POST https://healthapi.azaken.com//api/check-symptoms -H "Content-Type: application/json" -H "Authorization: Bearer <YOUR_FIREBASE_ID_TOKEN>" -d '{
   "symptoms": "I have a high fever, persistent cough, and a severe headache that has lasted for two days."
 }'
 ```
@@ -86,7 +86,7 @@ curl -X POST https://api.health.azaken.com/api/check-symptoms -H "Content-Type: 
 #### cURL Command:
 
 ```bash
-curl -X GET https://api.health.azaken.com/api/history -H "Authorization: Bearer <YOUR_FIREBASE_ID_TOKEN>"
+curl -X GET https://healthapi.azaken.com//api/history -H "Authorization: Bearer <YOUR_FIREBASE_ID_TOKEN>"
 ```
 
 **Sample Response (200 OK):**
