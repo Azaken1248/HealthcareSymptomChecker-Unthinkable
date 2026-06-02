@@ -31,7 +31,7 @@ function App() {
         if (token) {
           try {
             const result = await axios.get<HistoryItem[]>(
-              "https://api.health.azaken.com/api/history",
+              "https://healthapi.azaken.com//api/history",
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
@@ -72,7 +72,7 @@ function App() {
         throw new Error("Authentication failed. Please refresh the page.");
 
       const result = await axios.post<AnalysisResponse>(
-        "https://api.health.azaken.com/api/check-symptoms",
+        "https://healthapi.azaken.com//api/check-symptoms",
         { symptoms },
         { headers: { Authorization: `Bearer ${token}` } }
       );
