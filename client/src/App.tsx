@@ -10,6 +10,8 @@ import HistoryList from "./components/HistoryList";
 import ChatWindow from "./components/ChatWindow";
 import type { AnalysisResponse, HistoryItem } from "./types";
 
+const API_BASE_URL = "https://healthapi.azaken.com";
+
 function App() {
   const [symptoms, setSymptoms] = useState<string>("");
   const [currentResponse, setCurrentResponse] =
@@ -31,7 +33,7 @@ function App() {
         if (token) {
           try {
             const result = await axios.get<HistoryItem[]>(
-              "https://healthapi.azaken.com/api/history",
+              `${API_BASE_URL}/api/history`,
               {
                 headers: { Authorization: `Bearer ${token}` },
               }
@@ -72,7 +74,7 @@ function App() {
         throw new Error("Authentication failed. Please refresh the page.");
 
       const result = await axios.post<AnalysisResponse>(
-        "https://healthapi.azaken.com//api/check-symptoms",
+        `${API_BASE_URL}/api/check-symptoms`,
         { symptoms },
         { headers: { Authorization: `Bearer ${token}` } }
       );
