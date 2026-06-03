@@ -304,6 +304,27 @@ describe('server endpoints', () => {
     expect(mockState.firestoreAdd).not.toHaveBeenCalled();
   });
 
+  it('returns a 503 with retry guidance when the model layer is rate limited', async () => {
+    mockState.getStructuredLLMResponse.mockResolvedValue({
+      error: 'The AI service is temporarily rate-limited. Please try again in a minute.',
+      statusCode: 503,
+      retryAfterSeconds: 19,
+    });
+
+    const response = await request(app)
+      .post('/api/check-symptoms')
+      .set('Authorization', 'Bearer test-token')
+      .send({ symptoms: 'persistent headache and nausea' });
+
+    expect(response.status).toBe(503);
+    expect(response.headers['retry-after']).toBe('19');
+    expect(response.body).toEqual({
+      message: 'The AI service is temporarily rate-limited. Please try again in a minute.',
+      retryAfterSeconds: 19,
+    });
+    expect(mockState.firestoreAdd).not.toHaveBeenCalled();
+  });
+
   it('returns a 500 when the controller unexpectedly throws', async () => {
     mockState.getStructuredLLMResponse.mockRejectedValueOnce(new Error('model crashed'));
 

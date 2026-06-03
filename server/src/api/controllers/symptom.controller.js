@@ -28,7 +28,14 @@ export async function getSymptomAnalysis(req, res) {
     const analysis = await getStructuredLLMResponse(normalizedSymptoms);
 
     if (analysis.error) {
-      return res.status(502).json({ message: analysis.error });
+      if (analysis.retryAfterSeconds) {
+        res.set('Retry-After', String(analysis.retryAfterSeconds));
+      }
+
+      return res.status(analysis.statusCode ?? 502).json({
+        message: analysis.error,
+        ...(analysis.retryAfterSeconds ? { retryAfterSeconds: analysis.retryAfterSeconds } : {}),
+      });
     }
 
     const response = {

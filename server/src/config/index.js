@@ -8,6 +8,12 @@ function parsePort(value, fallback) {
   return Number.isInteger(parsedPort) && parsedPort > 0 ? parsedPort : fallback;
 }
 
+function parsePositiveInteger(value, fallback) {
+  const parsedValue = Number.parseInt(value ?? '', 10);
+
+  return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : fallback;
+}
+
 function parseOrigins(value, fallback) {
   if (!value) {
     return fallback;
@@ -40,6 +46,8 @@ if (!geminiApiKey) {
 
 const config = {
   port: parsePort(process.env.PORT, 8000),
+  llmMaxConcurrency: parsePositiveInteger(process.env.LLM_MAX_CONCURRENCY, 1),
+  llmMaxRetries: parsePositiveInteger(process.env.LLM_MAX_RETRIES, 2),
   nodeEnv,
   corsOrigins,
   requestBodyLimit: process.env.REQUEST_BODY_LIMIT?.trim() ?? '1mb',
