@@ -191,9 +191,9 @@ const responseSchema = {
   required: ['summary', 'disclaimer', 'possibleConditions', 'differentiatingSymptoms', 'nextSteps'],
 };
 
-async function runGeminiAnalysis(symptomText) {
+async function runGeminiAnalysis(symptomText, modelName) {
   const model = genAI.getGenerativeModel({
-    model: 'gemini-2.5-pro',
+    model: modelName,
     generationConfig: {
       responseMimeType: 'application/json',
       responseSchema,
@@ -229,21 +229,23 @@ export async function getStructuredLLMResponse(symptomText) {
   return withConcurrencyLimit(async () => {
     let lastError = null;
 
-    for (let attempt = 0; attempt <= config.llmMaxRetries; attempt += 1) {
+    for (const modelName of config.geminiModels) {
       try {
-        return await runGeminiAnalysis(symptomText);
+        return await runGeminiAnalysis(symptomText, modelName);
       } catch (error) {
         lastError = error;
 
-        if (!isRateLimitError(error) || attempt === config.llmMaxRetries) {
-          break;
+        if (isRateLimitError(error)) {
+          const retryDelayMs = Math.min(getRetryDelayMs(error) ?? 1000, 5000);
+          console.warn(
+            `Gemini model ${modelName} rate limited. Trying the next model in ${retryDelayMs}ms.`,
+          );
+          if (retryDelayMs > 0) {
+            await sleep(retryDelayMs);
+          }
+        } else {
+          console.warn(`Gemini model ${modelName} failed:`, error?.message ?? error);
         }
-
-        const retryDelayMs = Math.min(getRetryDelayMs(error) ?? 1000 * (attempt + 1), 5000);
-        console.warn(
-          `Gemini rate limited request. Retrying in ${retryDelayMs}ms (attempt ${attempt + 1}/${config.llmMaxRetries + 1}).`,
-        );
-        await sleep(retryDelayMs);
       }
     }
 

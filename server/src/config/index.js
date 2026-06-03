@@ -14,6 +14,19 @@ function parsePositiveInteger(value, fallback) {
   return Number.isInteger(parsedValue) && parsedValue > 0 ? parsedValue : fallback;
 }
 
+function parseList(value, fallback) {
+  if (!value) {
+    return fallback;
+  }
+
+  const entries = value
+    .split(',')
+    .map((entry) => entry.trim())
+    .filter(Boolean);
+
+  return entries.length > 0 ? entries : fallback;
+}
+
 function parseOrigins(value, fallback) {
   if (!value) {
     return fallback;
@@ -48,6 +61,11 @@ const config = {
   port: parsePort(process.env.PORT, 8000),
   llmMaxConcurrency: parsePositiveInteger(process.env.LLM_MAX_CONCURRENCY, 1),
   llmMaxRetries: parsePositiveInteger(process.env.LLM_MAX_RETRIES, 2),
+  geminiModels: parseList(process.env.GEMINI_MODELS, [
+    'gemini-2.0-flash',
+    'gemini-2.5-flash',
+    'gemini-2.5-pro',
+  ]),
   nodeEnv,
   corsOrigins,
   requestBodyLimit: process.env.REQUEST_BODY_LIMIT?.trim() ?? '1mb',
